@@ -152,6 +152,30 @@ You can use it to run the test suite as a database super user like so:
 
     make test PGUSER=postgres
 
+To run the tests in a local docker environment using the latest version
+of PostgreSQL, run:
+
+    cd test
+    docker compose build test
+    # start the postgres server in a docker container in the background
+    docker compose up -d test
+    # run the regression tests
+    docker compose exec test make install installcheck
+    # run the tests with pg_prove
+    # "run" builds and installs pgTAP, runs "CREATE EXTENSION"
+    # and then runs make test
+    docker compose exec test run
+    # Shut down the postgres container
+    docker compose down
+
+To test with a different version of PostgreSQL, set the environment variable
+`$pgtag` to one of the [PostgreSQL Docker](https://hub.docker.com/_/postgres)
+tags:
+
+    export pgtag=12-alpine
+
+Then run the above commands.
+
 Adding pgTAP to a Database
 --------------------------
 
@@ -3869,14 +3893,47 @@ cast does *not* exist.
 
 Tests for the presence of a binary operator. If the operator exists with the
 given schema, name, left and right arguments, and return value, the test will
-fail. If the operator does not exist, the test will fail. Example:
+pass. If the operator does not exist, the test will fail. Example:
 
     SELECT has_operator( 'integer', 'pg_catalog', '<=', 'integer', 'boolean' );
 
 If you omit the schema name, then the operator must be visible in the search
 path. If you omit the test description, pgTAP will generate a reasonable one
-for you. The return value is also optional. If you need to test for a left or
-right unary operator, use `has_leftop()` or `has_rightop()` instead.
+for you. The return value is also optional. If you need to test for a left
+(prefix) or right (postfix) unary operator, use `has_leftop()` or
+`has_rightop()` instead.
+
+### `hasnt_operator()` ###
+
+    SELECT hasnt_operator( :left_type, :schema, :name, :right_type, :return_type, :description );
+    SELECT hasnt_operator( :left_type, :schema, :name, :right_type, :return_type );
+    SELECT hasnt_operator( :left_type, :name, :right_type, :return_type, :description );
+    SELECT hasnt_operator( :left_type, :name, :right_type, :return_type );
+    SELECT hasnt_operator( :left_type, :name, :right_type, :description );
+    SELECT hasnt_operator( :left_type, :name, :right_type );
+
+**Parameters**
+
+`:left_type`
+: Data type of the left operand.
+
+`:schema`
+: Schema in which to find the operator.
+
+`:name`
+: Name of the operator.
+
+`:right_type`
+: Data type of the right operand.
+
+`:return_type`
+: Data type of the return value.
+
+`:description`
+: A short description of the test.
+
+This function is the inverse of `has_operator()`. The test passes if the
+specified operator does *not* exist.
 
 ### `has_leftop()` ###
 
@@ -3904,15 +3961,44 @@ right unary operator, use `has_leftop()` or `has_rightop()` instead.
 `:description`
 : A short description of the test.
 
-Tests for the presence of a left-unary operator. If the operator exists with
-the given schema, name, right argument, and return value, the test will fail.
-If the operator does not exist, the test will fail. Example:
+Tests for the presence of a left-unary (prefix) operator. If the operator
+exists with the given schema, name, right argument, and return value, the
+test will fail. If the operator does not exist, the test will fail. Example:
 
     SELECT has_leftop( 'pg_catalog', '!!', 'bigint', 'numeric' );
 
 If you omit the schema name, then the operator must be visible in the search
 path. If you omit the test description, pgTAP will generate a reasonable one
 for you. The return type is also optional.
+
+### `hasnt_leftop()` ###
+
+    SELECT hasnt_leftop( :schema, :name, :type, :return_type, :description );
+    SELECT hasnt_leftop( :schema, :name, :type, :return_type );
+    SELECT hasnt_leftop( :name, :type, :return_type, :description );
+    SELECT hasnt_leftop( :name, :type, :return_type );
+    SELECT hasnt_leftop( :name, :type, :description );
+    SELECT hasnt_leftop( :name, :type );
+
+**Parameters**
+
+`:schema`
+: Schema in which to find the operator.
+
+`:name`
+: Name of the operator.
+
+`:type`
+: Data type of the operand.
+
+`:return_type`
+: Data type of the return value.
+
+`:description`
+: A short description of the test.
+
+This function is the inverse of `has_leftop()`. The test passes if the
+specified operator does *not* exist.
 
 ### `has_rightop()` ###
 
@@ -3940,15 +4026,45 @@ for you. The return type is also optional.
 `:description`
 : A short description of the test.
 
-Tests for the presence of a right-unary operator. If the operator exists with
-the given left argument, schema, name, and return value, the test will fail.
-If the operator does not exist, the test will fail. Example:
+Tests for the presence of a right-unary (postfix) operator, supported through
+PostgreSQL 13. If the operator exists with the given left argument, schema,
+name, and return value, the test will fail. If the operator does not exist,
+the test will fail. Example:
 
     SELECT has_rightop( 'bigint', 'pg_catalog', '!', 'numeric' );
 
 If you omit the schema name, then the operator must be visible in the search
 path. If you omit the test description, pgTAP will generate a reasonable one
 for you. The return type is also optional.
+
+### `hasnt_rightop()` ###
+
+    SELECT hasnt_rightop( :schema, :name, :type, :return_type, :description );
+    SELECT hasnt_rightop( :schema, :name, :type, :return_type );
+    SELECT hasnt_rightop( :name, :type, :return_type, :description );
+    SELECT hasnt_rightop( :name, :type, :return_type );
+    SELECT hasnt_rightop( :name, :type, :description );
+    SELECT hasnt_rightop( :name, :type );
+
+**Parameters**
+
+`:schema`
+: Schema in which to find the operator.
+
+`:name`
+: Name of the operator.
+
+`:type`
+: Data type of the operand.
+
+`:return_type`
+: Data type of the return value.
+
+`:description`
+: A short description of the test.
+
+This function is the inverse of `hasnt_rightop()`. The test passes if the
+specified operator does *not* exist.
 
 ### `has_opclass()` ###
 
@@ -5945,6 +6061,45 @@ diagnostics listing the missing member roles, like so:
     #     Members missing from the meanies role:
     #         theory
     #         agliodbs
+
+If the group role does not exist, the diagnostics will tell you that, instead.
+But you use `has_role()` to make sure the role exists before you check its
+members, don't you? Of course you do.
+
+### `isnt_member_of()` ###
+
+    SELECT isnt_member_of( :role, :members, :description );
+    SELECT isnt_member_of( :role, :members );
+    SELECT isnt_member_of( :role, :member, :description );
+    SELECT isnt_member_of( :role, :member );
+
+**Parameters**
+
+`:role`
+: Name of a PostgreSQL group role.
+
+`:members`
+: Array of names of roles that should *not* be members of the group role.
+
+`:member`
+: Name of a role that should *not* be a member of the group role.
+
+`:description`
+: A short description of the test.
+
+    SELECT isnt_member_of( 'meanies', 'anna' 'Anna should not be a meanie' );
+    SELECT isnt_member_of( 'sweeties', ARRAY['dr_evil', 'dr_no' ] );
+
+The inverse of `is_member_of()`, checks whether a group role does not contain
+a member role or none of an array of member roles. If the description is
+omitted, it will default to "Should not have members of role `:role`." On
+failure, `isnt_member_of()` will output diagnostics listing the missing member
+roles, like so:
+
+    # Failed test 371: "Should not have members of role sweeties"
+    #     Members, who should not be in sweeties role:
+    #         dr_evil
+    #         dr_no
 
 If the group role does not exist, the diagnostics will tell you that, instead.
 But you use `has_role()` to make sure the role exists before you check its
