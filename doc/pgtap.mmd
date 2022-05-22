@@ -4707,6 +4707,8 @@ foreign key does *not* exist.
 
     SELECT col_is_pk( :schema, :table, :columns, :description );
     SELECT col_is_pk( :schema, :table, :column, :description );
+    SELECT col_is_pk( :schema, :table, :columns );
+    SELECT col_is_pk( :schema, :table, :column );
     SELECT col_is_pk( :table, :columns, :description );
     SELECT col_is_pk( :table, :column, :description );
     SELECT col_is_pk( :table, :columns );
@@ -4908,6 +4910,17 @@ should reference `:pk_column.pk_table(:pk_column)`. Some examples:
         ARRAY['person_given_name', 'person_surname'],
         'persons',
         ARRAY['given_name', 'surname'],
+    );
+
+To test constraints in a temporary table (for example, after running a function
+that's expected to create one), either omit the schema names or use
+`pg_my_temp_schema()::regnamespace::name` (on PostgreSQL 9.5 and higher) or
+`(SELECT nspname FROM pg_namespace WHERE oid = pg_my_temp_schema())` (on
+PostgreSQL 9.4 and lower) to specify the temporary schema name. For example:
+
+    SELECT fk_ok(
+        pg_my_temp_schema()::regnamespace::name, 'tmpa', 'id',
+        pg_my_temp_schema()::regnamespace::name, 'tmpb', 'id'
     );
 
 If the test fails, it will output useful diagnostics. For example this test:
@@ -8411,11 +8424,11 @@ The output, assuming a single startup test, two subtests, and a single
 shutdown test, will look something like this:
 
     ok 1 - Startup test
-        # Subtest: public.test_this()
+    # Subtest: public.test_this()
         ok 1 - simple pass
         ok 2 - another simple pass
     ok 2 - public.test_this()
-        # Subtest: public.test_that()
+    # Subtest: public.test_that()
         ok 1 - that simple
         ok 2 - that simple 2
     ok 3 - public.test_that()
