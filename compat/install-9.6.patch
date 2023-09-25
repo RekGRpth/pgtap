@@ -1,6 +1,6 @@
 --- sql/pgtap.sql
 +++ sql/pgtap.sql
-@@ -9898,136 +9898,6 @@
+@@ -10201,136 +10201,6 @@
      );
  $$ LANGUAGE sql;
  

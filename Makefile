@@ -13,6 +13,7 @@ EXTRA_CLEAN  = $(VERSION_FILES) sql/pgtap.sql sql/uninstall_pgtap.sql sql/pgtap-
 EXTRA_CLEAN  += $(wildcard sql/*.orig) # These are files left behind by patch
 DOCS         = doc/pgtap.mmd
 PG_CONFIG   ?= pg_config
+MODULES      = src/pgtap
 
 #
 # Test configuration. This must be done BEFORE including PGXS
@@ -204,6 +205,7 @@ uninstall-all:
 	rm -f $(EXTENSION_DIR)/pgtap*
 
 # TODO: switch this whole thing to a perl or shell script that understands the file naming convention and how to compare that to $VERSION.
+# VERSION = 9.1.0 # Uncomment to test all patches.
 sql/pgtap.sql: sql/pgtap.sql.in
 	cp $< $@
 ifeq ($(shell echo $(VERSION) | grep -qE "^(9[.][0123456]|8[.][1234])" && echo yes || echo no),yes)
@@ -248,9 +250,6 @@ sql/pgtap--0.96.0--0.97.0.sql: sql/pgtap--0.96.0--0.97.0.sql.in
 	cp $< $@
 ifeq ($(shell echo $(VERSION) | grep -qE "^(9[.][01234]|8[.][1234])" && echo yes || echo no),yes)
 	patch -p0 < compat/9.4/pgtap--0.96.0--0.97.0.patch
-endif
-ifeq ($(shell echo $(VERSION) | grep -qE "^(9[.]0|8[.][1234])" && echo yes || echo no),yes)
-	patch -p0 < compat/9.0/pgtap--0.96.0--0.97.0.patch
 endif
 
 EXTRA_CLEAN += sql/pgtap--0.95.0--0.96.0.sql
@@ -471,7 +470,7 @@ updatecheck_deps: pgtap-version-$(UPDATE_FROM) test/sql/update.sql
 # pg_regress --launcher not supported prior to 9.1
 # There are some other failures in 9.1 and 9.2 (see https://travis-ci.org/decibel/pgtap/builds/358206497).
 # TODO: find something that can generically compare majors (ie: GE91 from
-# https://github.com/decibel/pgxntool/blob/master/base.mk).
+# https://github.com/decibel/pgxntool/blob/0.1.10/base.mk).
 updatecheck_setup: updatecheck_deps
 	@if echo $(VERSION) | grep -qE "8[.]|9[.][012]"; then echo "updatecheck is not supported prior to 9.3"; exit 1; fi
 	$(eval SETUP_SCH = test/schedule/update.sch)
@@ -486,20 +485,19 @@ updatecheck_setup: updatecheck_deps
 updatecheck_run: updatecheck_setup installcheck
 
 latest-changes.md: Changes
-	perl -e 'while (<>) {last if /^(v?\Q${DISTVERSION}\E)/; } print "Changes for v${DISTVERSION}:\n"; while (<>) { last if /^\s*$$/; s/^\s+//; print }' Changes > $@
+	perl -e 'while (<>) {last if /^(v?\Q${DISTVERSION}\E)/; } print "Changes for v${DISTVERSION}\n"; while (<>) { last if /^\s*$$/; s/\s+$$//; if (/^\s*[*]/) { print "\n" } else { s/^\s+/ / } print } print "\n"' $< > $@
 
 #
 # STOLEN FROM pgxntool
 #
-
-# TARGET results: runs `make test` and copies all result files to test/expected/. DO NOT RUN THIS UNLESS YOU'RE CERTAIN ALL YOUR TESTS ARE PASSING!
+# TARGET results: runs `make test` and copies all result files to
+# test/expected/. Use for basic test changes with the latest version of
+# Postgres, but be aware that alternate `_n.out` files will not be updated.
+# DO NOT RUN THIS UNLESS YOU'RE CERTAIN ALL YOUR TESTS ARE PASSING!
 .PHONY: results
-results: installcheck result-rsync
-
-.PHONY:
-result-rsync:
+results:
+	$(MAKE) installcheck || true
 	rsync -rlpgovP results/ test/expected
-
 
 # To use this, do make print-VARIABLE_NAME
 print-%	: ; $(info $* is $(flavor $*) variable set to "$($*)") @true

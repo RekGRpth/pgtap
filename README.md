@@ -1,4 +1,4 @@
-pgTAP 1.3.1
+pgTAP 1.3.2
 ============
 
 [pgTAP](https://pgtap.org) is a unit testing framework for PostgreSQL written
@@ -80,12 +80,6 @@ If you've upgraded your cluster to PostgreSQL 9.1 and already had pgTAP
 installed, you can upgrade it to a properly packaged extension with:
 
     CREATE EXTENSION pgtap FROM unpackaged;
-
-If you want to install pgTAP and all of its supporting objects into a
-specific schema, use the `PGOPTIONS` environment variable to specify the
-schema, like so:
-
-    PGOPTIONS=--search_path=tap psql -d mydb -f pgTAP.sql
 
 If you want to install pgTAP and all of its supporting objects into a specific
 schema, use the `SCHEMA` clause to specify the schema, like so:
