@@ -5,6 +5,8 @@ Revision history for pgTAP
 --------------------------
 * Converted the documentation from MultiMarkdown to Markdown, now that PGXN
   has upgraded its Markdown parser.
+* Added an example of an empty array, `'{}'::name[]`, to each mention in the
+  documentation. Thanks Kevin Brannen for the suggestion (#362).
 
 1.3.4 2025-10-04T17:20:28Z
 --------------------------

@@ -5943,8 +5943,9 @@ language. The function name is required. If the `:schema` argument is omitted,
 then the function must be visible in the search path. If the `:args[]`
 argument is passed, then the function with that argument signature will be the
 one tested; otherwise, a function with any signature will be checked (pass an
-empty array to specify a function with an empty signature). If the
-`:description` is omitted, a reasonable substitute will be created. Examples:
+empty array (`'{}'::name[]`) to specify a function with an empty signature).
+If the `:description` is omitted, a reasonable substitute will be created.
+Examples:
 
 ```sql
 SELECT function_lang_is( 'myschema', 'foo',  ARRAY['integer', 'text'], 'plperl' );
@@ -6012,9 +6013,9 @@ SELECT function_returns( 'do_something', ARRAY['numeric'], 'numeric' );
 If the `:schema` argument is omitted, then the function must be visible in the
 search path. If the `:args[]` argument is passed, then the function with that
 argument signature will be the one tested; otherwise, a function with any
-signature will be checked (pass an empty array to specify a function with an
-empty signature). If the `:description` is omitted, a reasonable substitute
-will be created.
+signature will be checked (pass an empty array, `'{}'::name[]`, to specify a
+function with an empty signature). If the `:description` is omitted, a
+reasonable substitute will be created.
 
 Procedures can also be tested; they always return `void`:
 
@@ -6063,13 +6064,13 @@ SELECT is_definer( :function );
 `:description`
 : A short description of the test.
 
-Tests that a function or procedure is a security definer (i.e., a "setuid" function). If
-the `:schema` argument is omitted, then the function must be visible in the
-search path. If the `:args` argument is passed, then the function with that
-argument signature will be the one tested; otherwise, a function with any
-signature will be checked (pass an empty array to specify a function with an
-empty signature). If the `:description` is omitted, a reasonable substitute
-will be created. Examples:
+Tests that a function or procedure is a security definer (i.e., a "setuid"
+function). If the `:schema` argument is omitted, then the function must be
+visible in the search path. If the `:args` argument is passed, then the
+function with that argument signature will be the one tested; otherwise, a
+function with any signature will be checked (pass an empty array,
+`'{}'::name[]`, to specify a function with an empty signature). If the
+`:description` is omitted, a reasonable substitute will be created. Examples:
 
 ```sql
 SELECT is_definer( 'myschema', 'foo', ARRAY['integer', 'text'] );
@@ -6239,10 +6240,11 @@ Tests that a function is a normal function --- that is, not an aggregate,
 window, or procedural function. If the `:schema` argument is omitted, then the
 function must be visible in the search path. If the `:args[]` argument is
 passed, then the function with that argument signature will be the one tested;
-otherwise, a function with any signature will be checked (pass an empty array to
-specify a function with an empty signature). If the `:description` is omitted, a
-reasonable substitute will be created. Fails if the function is not a normal
-function or if the function does not exist. Examples:
+otherwise, a function with any signature will be checked (pass an empty array,
+`'{}'::name[]`, to specify a function with an empty signature). If the
+`:description` is omitted, a reasonable substitute will be created. Fails if
+the function is not a normal function or if the function does not exist.
+Examples:
 
 ```sql
 SELECT is_normal_function( 'myschema', 'foo',  ARRAY['integer', 'text'] );
@@ -6323,13 +6325,13 @@ SELECT is_aggregate( :function );
 : A short description of the test.
 
 Tests that a function is an aggregate function. If the `:schema` argument is
-omitted, then the function must be visible in the search path. If the `:args[]`
-argument is passed, then the function with that argument signature will be the
-one tested; otherwise, a function with any signature will be checked (pass an
-empty array to specify a function with an empty signature). If the
-`:description` is omitted, a reasonable substitute will be created. Fails if the
-function is not an aggregate function, or if the function does not exist.
-Examples:
+omitted, then the function must be visible in the search path. If the
+`:args[]` argument is passed, then the function with that argument signature
+will be the one tested; otherwise, a function with any signature will be
+checked (pass an empty array, `'{}'::name[]`, to specify a function with an
+empty signature). If the `:description` is omitted, a reasonable substitute
+will be created. Fails if the function is not an aggregate function, or if the
+function does not exist. Examples:
 
 ```sql
 SELECT is_aggregate( 'myschema', 'foo',  ARRAY['integer', 'text'] );
@@ -6410,12 +6412,13 @@ SELECT is_window( :function );
 : A short description of the test.
 
 Tests that a function is a window function. If the `:schema` argument is
-omitted, then the function must be visible in the search path. If the `:args[]`
-argument is passed, then the function with that argument signature will be the
-one tested; otherwise, a function with any signature will be checked (pass an
-empty array to specify a function with an empty signature). If the
-`:description` is omitted, a reasonable substitute will be created. Fails if the
-function is not a window function or if the function does not exist. Examples:
+omitted, then the function must be visible in the search path. If the
+`:args[]` argument is passed, then the function with that argument signature
+will be the one tested; otherwise, a function with any signature will be
+checked (pass an empty array, `'{}'::name[]`, to specify a function with an
+empty signature). If the `:description` is omitted, a reasonable substitute
+will be created. Fails if the function is not a window function or if the
+function does not exist. Examples:
 
 ```sql
 SELECT is_window( 'myschema', 'foo',  ARRAY['integer', 'text'] );
@@ -6496,12 +6499,13 @@ SELECT is_procedure( :function );
 : A short description of the test.
 
 Tests that a function is a procedural function. If the `:schema` argument is
-omitted, then the function must be visible in the search path. If the `:args[]`
-argument is passed, then the function with that argument signature will be the
-one tested; otherwise, a function with any signature will be checked (pass an
-empty array to specify a function with an empty signature). If the
-`:description` is omitted, a reasonable substitute will be created. Fails if the
-function is not a procedure or if the function does not exist. Examples:
+omitted, then the function must be visible in the search path. If the
+`:args[]` argument is passed, then the function with that argument signature
+will be the one tested; otherwise, a function with any signature will be
+checked (pass an empty array, `'{}'::name[]`, to specify a function with an
+empty signature). If the `:description` is omitted, a reasonable substitute
+will be created. Fails if the function is not a procedure or if the function
+does not exist. Examples:
 
 ```sql
 SELECT is_procedure( 'myschema', 'foo',  ARRAY['integer', 'text'] );
@@ -6591,9 +6595,9 @@ for details. The function name is required. If the `:schema` argument is
 omitted, then the function must be visible in the search path. If the
 `:args[]` argument is passed, then the function with that argument signature
 will be the one tested; otherwise, a function with any signature will be
-checked (pass an empty array to specify a function with an empty signature).
-If the `:description` is omitted, a reasonable substitute will be created.
-Examples:
+checked (pass an empty array, `'{}'::name[]`, to specify a function with an
+empty signature). If the `:description` is omitted, a reasonable substitute
+will be created. Examples:
 
 ```sql
 SELECT volatility_is( 'myschema', 'foo',  ARRAY['integer', 'text'], 'stable' );
@@ -9628,7 +9632,7 @@ Credits
 Copyright and License
 ---------------------
 
-Copyright (c) 2008-2025 David E. Wheeler. Some rights reserved.
+Copyright (c) 2008-2026 David E. Wheeler. Some rights reserved.
 
 Permission to use, copy, modify, and distribute this software and its
 documentation for any purpose, without fee, and without a written agreement is

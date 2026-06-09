@@ -27,7 +27,7 @@ byte_len() (
 )
 
 check_bin() {
-    for f in pg_ctl psql initdb; do
+    for f in pg_ctl psql initdb createdb; do
         [ -x "$1/$f" ] || die 1 "$1/$f does not exist or is not executable"
     done
 }
@@ -189,10 +189,10 @@ fi
 
 # Postgres 18 enables checksums by default, so turn them off to be compatible
 # with earlier versions, where they're off by default.
-if [ "$OLD_VERSION" -ge 18 ]; then
+if [ "${OLD_VERSION%.*}" -ge 18 ]; then
     old_initdb+=" --no-data-checksums"
 fi
-if [ "$NEW_VERSION" -ge 18 ]; then
+if [ "${NEW_VERSION%.*}" -ge 18 ]; then
     new_initdb+=" --no-data-checksums"
 fi
 
@@ -209,12 +209,13 @@ wait
 banner "Starting OLD $OLD_VERSION postgres via $old_pg_ctl"
 export PGDATA=$old_dir
 export PGPORT=$OLD_PORT
+# export PGMAXPROTOCOLVERSION=3.0 # Required to support Postgres 9.2 and earlier
 modify_config $OLD_VERSION
 
 $old_pg_ctl start $ctl_separator -w # older versions don't support --wait
 
 echo "Creating database"
-createdb # Note this uses PGPORT, so no need to wrap.
+"$(find_at_path "$OLD_PATH" createdb)"
 
 echo "Installing pgtap"
 # If user requested sudo then we need to use it for the install step. TODO:
@@ -223,7 +224,7 @@ echo "Installing pgtap"
 $sudo make clean install
 
 banner "Loading extension"
-psql -c 'CREATE EXTENSION pgtap' # Also uses PGPORT
+"$(find_at_path "$OLD_PATH" psql)" -c 'CREATE EXTENSION pgtap'
 
 echo "Stopping OLD postgres via $old_pg_ctl"
 $old_pg_ctl stop $ctl_separator -w # older versions don't support --wait
