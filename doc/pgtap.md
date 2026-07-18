@@ -77,7 +77,7 @@ make install
 make installcheck
 ```
 
-tial Issues
+Potential Issues
 ----------------
 
 If you encounter an error such as:
@@ -729,7 +729,7 @@ Its advantages over `ok()` are similar to that of `is()` and `isnt()`: Better
 diagnostics on failure.
 
 ### `unalike()` ###
-### `unalike()` ###
+### `unialike()` ###
 
 ```sql
 SELECT unalike(  :this, :like, :description );
@@ -1371,27 +1371,27 @@ For example, say that you want to compare queries against a `persons` table.
 The simplest way to sort is by `name`, as in:
 
 ```pgsql
- try=# select * from people order by name;
-   name  | age
- --------+-----
-  Damian |  19
-  Larry  |  53
-  Tom    |  44
-  Tom    |  35
- (4 rows)
+try=# select * from people order by name;
+  name  | age
+--------+-----
+ Damian |  19
+ Larry  |  53
+ Tom    |  44
+ Tom    |  35
+(4 rows)
 ```
 
 But a different run of the same query could have the rows in different order:
 
 ```pgsql
- try=# select * from people order by name;
-   name  | age
- --------+-----
-  Damian |  19
-  Larry  |  53
-  Tom    |  35
-  Tom    |  44
- (4 rows)
+try=# select * from people order by name;
+  name  | age
+--------+-----
+ Damian |  19
+ Larry  |  53
+ Tom    |  35
+ Tom    |  44
+(4 rows)
  ```
 
 Notice how the two "Tom" rows are reversed. The upshot is that you must ensure
@@ -6906,7 +6906,7 @@ Tests that a database user is a super user. If the description is omitted, it
 will default to "User `:user` should be a super user". Example:
 
 ```sql
-    SELECT is_superuser('theory');
+SELECT is_superuser('theory');
 ```
 
 If the user does not exist in the database, the diagnostics will say so.
@@ -6956,11 +6956,6 @@ SELECT is_member_of( :role, :member );
 `:description`
 : A short description of the test.
 
-```sql
-SELECT is_member_of( 'sweeties', 'anna' 'Anna should be a sweetie' );
-SELECT is_member_of( 'meanies', ARRAY['dr_evil', 'dr_no' ] );
-```
-
 Checks whether a group role contains a member role or all of an array of
 member roles. If the description is omitted, it will default to "Should have
 members of role `:role`." On failure, `is_member_of()` will output
@@ -6974,6 +6969,13 @@ diagnostics listing the missing member roles, like so:
 If the group role does not exist, the diagnostics will tell you that, instead.
 But you use `has_role()` to make sure the role exists before you check its
 members, don't you? Of course you do.
+
+Exmples:
+
+```sql
+SELECT is_member_of( 'sweeties', 'anna' 'Anna should be a sweetie' );
+SELECT is_member_of( 'meanies', ARRAY['dr_evil', 'dr_no' ] );
+```
 
 ### `isnt_member_of()` ###
 
