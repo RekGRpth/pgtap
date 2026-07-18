@@ -8,7 +8,6 @@ uninstall_pgtap.sql
 results
 regression.*
 *.html
-*.html1
 *.sql.orig
 bbin
 

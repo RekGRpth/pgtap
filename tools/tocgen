@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use English;
-$INPLACE_EDIT=1;
+$INPLACE_EDIT='';
 
 
 our $prevn;

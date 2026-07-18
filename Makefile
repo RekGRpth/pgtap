@@ -287,11 +287,23 @@ $(B_DIR)/static/%/: %/ $(B_DIR)/static
 # Make sure that we build the regression tests.
 installcheck: test/setup.sql
 
-html:
+doc/pgtap.html: doc/pgtap.md
 	multimarkdown doc/pgtap.md > doc/pgtap.html
-# 	discount -f FENCEDCODE -f DLEXTRA -f HTML5 -f TOC -f FOOTNOTE -f IDANCHOR doc/pgtap.md > doc/pgtap.html
-	tools/tocgen doc/pgtap.html 2> doc/toc.html
+
+# We use multimarkdown to preserve link IDs on pgtap.org, but keep a reference
+# to the discount version as it's preferable in some ways, so we may want to
+# change it in the future.
+# Flags reference: https://github.com/Orc/discount/blob/main/flags.c
+doc/pgtap-discount.html: doc/pgtap.md
+	discount -f FENCEDCODE -f DLEXTRA -f HTML5 -f TOC -f FOOTNOTE -f IDANCHOR -f TOC $< > $@
+
+doc/toc.html: doc/pgtap.html
+	tools/tocgen $< 2> $@
+
+doc/pg_prove.html:
 	perl -MPod::Simple::XHTML -E "my \$$p = Pod::Simple::XHTML->new; \$$p->html_header_tags('<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">'); \$$p->strip_verbatim_indent(sub { my \$$l = shift; (my \$$i = \$$l->[0]) =~ s/\\S.*//; \$$i }); \$$p->parse_from_file('`perldoc -l pg_prove`')" > doc/pg_prove.html
+
+html: doc/pgtap.html doc/toc.html doc/pg_prove.html
 
 #
 # Actual test targets
