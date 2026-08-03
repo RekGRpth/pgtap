@@ -2,7 +2,7 @@
 \i test/setup.sql
 -- \i sql/pgtap.sql
 
-SELECT plan(96);
+SELECT plan(102);
 --SELECT * FROM no_plan();
 
 -- This will be rolled back. :-)
@@ -114,6 +114,14 @@ SELECT * FROM check_test(
 );
 
 SELECT * FROM check_test(
+    hasnt_pk( 'public', 'sometab'::name ),
+    false,
+    'hasnt_pk( schema, table )',
+    'Table public.sometab should not have a primary key',
+    ''
+);
+
+SELECT * FROM check_test(
     hasnt_pk( 'sometab', 'sometab should not have a pk' ),
     false,
     'hasnt_pk( table, description )',
@@ -134,6 +142,14 @@ SELECT * FROM check_test(
     true,
     'hasnt_pk( schema, table, description ) pass',
     'public.pkless should not have a pk',
+    ''
+);
+
+SELECT * FROM check_test(
+    hasnt_pk( 'public', 'pkless'::name ),
+    true,
+    'hasnt_pk( schema, table ) pass',
+    'Table public.pkless should not have a primary key',
     ''
 );
 

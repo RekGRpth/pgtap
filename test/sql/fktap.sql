@@ -1,7 +1,7 @@
 \unset ECHO
 \i test/setup.sql
 
-SELECT plan(134);
+SELECT plan(140);
 --SELECT * from no_plan();
 
 -- These will be rolled back. :-)
@@ -78,6 +78,13 @@ SELECT * FROM check_test(
 );
 
 SELECT * FROM check_test(
+    has_fk( 'public', 'fk'::name ),
+    true,
+    'has_fk( schema, table )',
+    'Table public.fk should have a foreign key constraint'
+);
+
+SELECT * FROM check_test(
     has_fk( 'fk', 'fk should have an fk' ),
     'true',
     'has_fk( table, description )',
@@ -129,6 +136,13 @@ SELECT * FROM check_test(
 );
 
 SELECT * FROM check_test(
+    hasnt_fk( 'public', 'fk'::name ),
+    false,
+    'hasnt_fk( schema, table )',
+    'Table public.fk should not have a foreign key constraint'
+);
+
+SELECT * FROM check_test(
     hasnt_fk( 'fk', 'fk should not have an fk' ),
     'false',
     'hasnt_fk( table, description )',
@@ -147,6 +161,13 @@ SELECT * FROM check_test(
     true,
     'hasnt_fk( schema, table, description ) pass',
     'pg_catalog.pg_class should not have an fk'
+);
+
+SELECT * FROM check_test(
+    hasnt_fk( 'pg_catalog', 'pg_class'::name ),
+    true,
+    'hasnt_fk( schema, table ) pass',
+    'Table pg_catalog.pg_class should not have a foreign key constraint'
 );
 
 SELECT * FROM check_test(

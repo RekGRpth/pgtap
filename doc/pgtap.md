@@ -5121,6 +5121,7 @@ SELECT has_pk( 'myschema', 'mytable'::name );
 
 ```sql
 SELECT hasnt_pk( :schema, :table, :description );
+SELECT hasnt_pk( :schema, :table );
 SELECT hasnt_pk( :table, :description );
 SELECT hasnt_pk( :table );
 ```
@@ -5143,6 +5144,7 @@ primary key does *not* exist.
 
 ```sql
 SELECT has_fk( :schema, :table, :description );
+SELECT has_fk( :schema, :table );
 SELECT has_fk( :table, :description );
 SELECT has_fk( :table );
 ```
@@ -5169,6 +5171,7 @@ table in question does not exist.
 
 ```sql
 SELECT hasnt_fk( :schema, :table, :description );
+SELECT hasnt_fk( :schema, :table );
 SELECT hasnt_fk( :table, :description );
 SELECT hasnt_fk( :table );
 ```
@@ -5441,6 +5444,7 @@ Will produce something like this:
 
 ```sql
 SELECT has_unique( :schema, :table, :description );
+SELECT has_unique( :schema, :table );
 SELECT has_unique( :table, :description );
 SELECT has_unique( :table );
 ```
@@ -5462,6 +5466,29 @@ description. If the schema is omitted, the table must be visible in the search
 path. If the test description is omitted, it will be set to "Table `:table`
 should have a unique constraint". Note that this test will fail if the table
 in question does not exist.
+
+### `hasnt_unique()` ###
+
+```sql
+SELECT hasnt_unique( :schema, :table, :description );
+SELECT hasnt_unique( :schema, :table );
+SELECT hasnt_unique( :table, :description );
+SELECT hasnt_unique( :table );
+```
+
+**Parameters**
+
+`:schema`
+: Schema in which to find the table.
+
+`:table`
+: Name of a table.
+
+`:description`
+: A short description of the test.
+
+This function is the inverse of `has_unique()`. The test passes if the
+specified unique constraint does *not* exist.
 
 ### `col_is_unique()` ###
 
@@ -5524,6 +5551,7 @@ were actually found, if any:
 
 ```sql
 SELECT has_check( :schema, :table, :description );
+SELECT has_check( :schema, :table );
 SELECT has_check( :table, :description );
 SELECT has_check( :table );
 ```
@@ -5552,6 +5580,29 @@ that do have check constraints, if any:
     Failed test 41: "users.email should have a check constraint"
             have: {username}
             want: {email}
+
+### `hasnt_check()` ###
+
+```sql
+SELECT hasnt_check( :schema, :table, :description );
+SELECT hasnt_check( :schema, :table );
+SELECT hasnt_check( :table, :description );
+SELECT hasnt_check( :table );
+```
+
+**Parameters**
+
+`:schema`
+: Schema in which to find the table.
+
+`:table`
+: Name of a table.
+
+`:description`
+: A short description of the test.
+
+This function is the inverse of `has_check()`. The test passes if the
+specified check constraint does *not* exist.
 
 ### `col_has_check()` ###
 
